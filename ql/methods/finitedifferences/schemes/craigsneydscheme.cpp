@@ -40,7 +40,7 @@ namespace QuantLib {
         Array y = a + dt_*map_->apply(a);
         bcSet_.applyAfterApplying(y);
 
-        Array y0 = y;
+        Array y0 = std::move(y);
 
         for (Size i=0; i < map_->size(); ++i) {
             Array rhs = y - theta_*dt_*map_->apply_direction(i, a);
@@ -57,10 +57,10 @@ namespace QuantLib {
         }
         bcSet_.applyAfterSolving(yt);
 
-        a = yt;
+        a = std::move(yt);
     }
 
     void CraigSneydScheme::setStep(Time dt) {
-        dt_=dt;
+        dt_=std::move(dt);
     }
 }

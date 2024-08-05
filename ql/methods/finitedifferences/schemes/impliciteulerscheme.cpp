@@ -35,7 +35,7 @@ namespace QuantLib {
       map_(std::move(map)), bcSet_(bcSet), solverType_(solverType) {}
 
     Array ImplicitEulerScheme::apply(const Array& r, Real theta) const {
-        return r - (theta*dt_)*map_->apply(r);
+        return std::move(r - (theta*dt_)*map_->apply(r));
     }
 
     void ImplicitEulerScheme::step(array_type& a, Time t) {
@@ -50,11 +50,11 @@ namespace QuantLib {
         bcSet_.applyBeforeSolving(*map_, a);
 
         if (map_->size() == 1) {
-            a = map_->solve_splitting(0, a, -theta*dt_);
+            a = std::move(map_->solve_splitting(0, a, -theta*dt_));
         }
         else {
-            auto preconditioner = [&](const Array& _a){ return map_->preconditioner(_a, -theta*dt_); };
-            auto applyF = [&](const Array& _a){ return apply(_a, theta); };
+            auto preconditioner = [&](const Array& _a){ return std::move(map_->preconditioner(_a, -theta*dt_)); };
+            auto applyF = [&](const Array& _a){ return std::move(apply(_a, theta)); };
 
             if (solverType_ == BiCGstab) {
                 const BiCGStabResult result =
@@ -80,7 +80,7 @@ namespace QuantLib {
     }
 
     void ImplicitEulerScheme::setStep(Time dt) {
-        dt_=dt;
+        dt_=std::move(dt);
     }
 
     Size ImplicitEulerScheme::numberOfIterations() const {

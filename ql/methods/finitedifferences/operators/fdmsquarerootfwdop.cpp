@@ -288,27 +288,27 @@ namespace QuantLib {
     }
 
     Array FdmSquareRootFwdOp::apply(const Array& p) const {
-        return mapX_->apply(p);
+        return std::move(mapX_->apply(p));
     }
 
     Array FdmSquareRootFwdOp::apply_mixed(const Array& r) const {
-        return Array(r.size(), 0.0);
+        return std::move(Array(r.size(), 0.0));
     }
 
     Array FdmSquareRootFwdOp::apply_direction(
         Size direction, const Array& r) const {
         if (direction == direction_) {
-            return mapX_->apply(r);
+            return std::move(mapX_->apply(r));
         }
         else {
-            return Array(r.size(), 0.0);
+            return std::move(Array(r.size(), 0.0));
         }
     }
 
     Array FdmSquareRootFwdOp::solve_splitting(
         Size direction, const Array& r, Real dt) const {
         if (direction == direction_) {
-            return mapX_->solve_splitting(r, dt, 1.0);
+            return std::move(mapX_->solve_splitting(r, dt, 1.0));
         }
         else {
             return r;
@@ -317,7 +317,7 @@ namespace QuantLib {
 
     Array FdmSquareRootFwdOp::preconditioner(
         const Array& r, Real dt) const {
-        return solve_splitting(direction_, r, dt);
+        return std::move(solve_splitting(direction_, r, dt));
     }
 
     std::vector<SparseMatrix> FdmSquareRootFwdOp::toMatrixDecomp() const {

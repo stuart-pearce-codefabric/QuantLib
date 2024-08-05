@@ -60,19 +60,19 @@ namespace QuantLib {
     }
 
     Array FdmSabrOp::apply(const Array& u) const {
-        return mapF_.apply(u) + mapA_.apply(u) + correlationMap_.apply(u);
+        return std::move(mapF_.apply(u) + mapA_.apply(u) + correlationMap_.apply(u));
     }
 
     Array FdmSabrOp::apply_mixed(const Array& r) const {
-        return correlationMap_.apply(r);
+        return std::move(correlationMap_.apply(r));
     }
 
     Array FdmSabrOp::apply_direction(
         Size direction, const Array& r) const {
         if (direction == 0)
-            return mapF_.apply(r);
+            return std::move(mapF_.apply(r));
         else if (direction == 1)
-            return mapA_.apply(r);
+            return std::move(mapA_.apply(r));
         else
             QL_FAIL("direction too large");
     }
@@ -81,10 +81,10 @@ namespace QuantLib {
        Size direction, const Array& r, Real a) const {
 
         if (direction == 0) {
-            return mapF_.solve_splitting(r, a, 1.0);
+            return std::move(mapF_.solve_splitting(r, a, 1.0));
         }
         else if (direction == 1) {
-            return mapA_.solve_splitting(r, a, 1.0);
+            return std::move(mapA_.solve_splitting(r, a, 1.0));
         }
         else
             QL_FAIL("direction too large");
@@ -93,7 +93,7 @@ namespace QuantLib {
     Array FdmSabrOp::preconditioner(
         const Array& r, Real dt) const {
 
-        return solve_splitting(1, solve_splitting(0, r, dt), dt) ;
+        return std::move(solve_splitting(1, solve_splitting(0, r, dt), dt));
     }
 
     std::vector<SparseMatrix> FdmSabrOp::toMatrixDecomp() const {

@@ -64,7 +64,7 @@ namespace QuantLib {
     }
 
     Array FdmOrnsteinUhlenbeckOp::apply(const Array& r) const {
-        return mapX_.apply(r);
+        return std::move(mapX_.apply(r));
     }
 
     Array FdmOrnsteinUhlenbeckOp::apply_mixed(const Array& r) const {
@@ -73,7 +73,7 @@ namespace QuantLib {
 
     Array FdmOrnsteinUhlenbeckOp::apply_direction(Size direction, const Array& r) const {
         if (direction == direction_) {
-            return mapX_.apply(r);
+            return std::move(mapX_.apply(r));
         }
         else {
             return Array(r.size(), 0.0);
@@ -82,7 +82,7 @@ namespace QuantLib {
 
     Array FdmOrnsteinUhlenbeckOp::solve_splitting(Size direction, const Array& r, Real a) const {
         if (direction == direction_) {
-            return mapX_.solve_splitting(r, a, 1.0);
+            return std::move(mapX_.solve_splitting(r, a, 1.0));
         }
         else {
             return r;
@@ -90,7 +90,7 @@ namespace QuantLib {
     }
 
     Array FdmOrnsteinUhlenbeckOp::preconditioner(const Array& r, Real dt) const {
-        return solve_splitting(direction_, r, dt);
+        return std::move(solve_splitting(direction_, r, dt));
     }
 
     std::vector<SparseMatrix> FdmOrnsteinUhlenbeckOp::toMatrixDecomp() const {

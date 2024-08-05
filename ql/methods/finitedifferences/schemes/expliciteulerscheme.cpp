@@ -42,6 +42,6 @@ namespace QuantLib {
     }
 
     void ExplicitEulerScheme::setStep(Time dt) {
-        dt_ = dt;
+        dt_ = std::move(dt);
     }
 }

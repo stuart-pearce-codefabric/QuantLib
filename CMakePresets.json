@@ -360,6 +360,59 @@
           "ninja",
           "_relwithdebinfo"
       ]
+    },
+    {
+      "name": "linux-optimized-release",
+      "description": "Linux optimized build with all performance features enabled",
+      "inherits": [
+        "linux-gcc-base",
+        "ninja",
+        "_release"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_UNITY_BUILD": "ON",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+        "QL_ENABLE_OPENMP": "ON",
+        "QL_USE_STD_CLASSES": "ON",
+        "QL_FASTER_LAZY_OBJECTS": "ON",
+        "BUILD_SHARED_LIBS": true
+      }
+    },
+    {
+      "name": "windows-optimized-release",
+      "description": "Windows optimized build with all performance features enabled",
+      "inherits": [
+        "windows-msvc-base",
+        "ninja",
+        "_release"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_UNITY_BUILD": "ON",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+        "QL_ENABLE_OPENMP": "ON",
+        "QL_USE_STD_CLASSES": "ON",
+        "QL_FASTER_LAZY_OBJECTS": "ON"
+      }
+    },
+    {
+      "name": "apple-optimized-release",
+      "description": "Apple optimized build with all performance features enabled",
+      "inherits": [
+        "apple-arm64-base",
+        "ninja",
+        "_release"
+      ],
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_UNITY_BUILD": "ON",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+        "QL_ENABLE_OPENMP": "ON",
+        "QL_USE_STD_CLASSES": "ON",
+        "QL_FASTER_LAZY_OBJECTS": "ON",
+        "BUILD_SHARED_LIBS": true
+      }
     }
   ]
 }

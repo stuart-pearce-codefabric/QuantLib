@@ -42,7 +42,7 @@ set(QL_INSTALL_CMAKEDIR "lib/cmake/${PACKAGE_NAME}" CACHE STRING
 option(QL_BUILD_EXAMPLES "Build examples" ON)
 option(QL_BUILD_TEST_SUITE "Build test suite" ON)
 option(QL_BUILD_FUZZ_TEST_SUITE "Build fuzz test suite" OFF) 
-option(QL_ENABLE_OPENMP "Detect and use OpenMP" OFF)
+option(QL_ENABLE_OPENMP "Detect and use OpenMP" ON)
 option(QL_ENABLE_PARALLEL_UNIT_TEST_RUNNER "Enable the parallel unit test runner" OFF)
 option(QL_ENABLE_SESSIONS "Singletons return different instances for different sessions" OFF)
 option(QL_ENABLE_THREAD_SAFE_OBSERVER_PATTERN "Enable the thread-safe observer pattern" OFF)
@@ -72,9 +72,9 @@ set(QL_EXTERNAL_SUBDIRECTORIES "" CACHE STRING "Optional list of external source
 # set -lpapi here
 set(QL_EXTRA_LINK_LIBRARIES "" CACHE STRING "Optional extra link libraries to add to QuantLib")
 
-# Require C++14 or higher
+# Require C++14 or higher (C++17 recommended for performance)
 if (NOT DEFINED CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
 elseif(CMAKE_CXX_STANDARD LESS 14)
     message(FATAL_ERROR "Please specify CMAKE_CXX_STANDARD of 14 or higher")
 endif()
@@ -86,12 +86,33 @@ if (NOT DEFINED CMAKE_CXX_EXTENSIONS)
     set(CMAKE_CXX_EXTENSIONS FALSE)
 endif()
 
+# Enable Unity Build for faster compilation
+if (NOT DEFINED CMAKE_UNITY_BUILD)
+    set(CMAKE_UNITY_BUILD ON)
+endif()
+
+# Enable compiler cache for faster rebuilds
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM AND NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    message(STATUS "Using ccache: ${CCACHE_PROGRAM}")
+endif()
+
 # Convenience option to activate all STD options
 if (QL_USE_STD_CLASSES)
     if (CMAKE_CXX_STANDARD GREATER_EQUAL 17)
         set(QL_USE_STD_ANY ON)
         set(QL_USE_STD_OPTIONAL ON)
     endif()
+    set(QL_USE_STD_FUNCTION ON)
+    set(QL_USE_STD_SHARED_PTR ON)
+    set(QL_USE_STD_TUPLE ON)
+endif()
+
+# Enable std:: alternatives by default for C++17+ (better performance)
+if (CMAKE_CXX_STANDARD GREATER_EQUAL 17 AND NOT DEFINED QL_USE_STD_CLASSES)
+    set(QL_USE_STD_ANY ON)
+    set(QL_USE_STD_OPTIONAL ON)
     set(QL_USE_STD_FUNCTION ON)
     set(QL_USE_STD_SHARED_PTR ON)
     set(QL_USE_STD_TUPLE ON)
@@ -213,6 +234,18 @@ if (CMAKE_POSITION_INDEPENDENT_CODE)
     # cmake policy CMP0083: add PIE support if possible (need cmake 3.14)
     include(CheckPIESupported)
     check_pie_supported()
+endif()
+
+# Enable Link-Time Optimization (LTO) for Release builds
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)
+if(ipo_supported AND NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
+    message(STATUS "Link-Time Optimization (LTO) enabled for Release builds")
+else()
+    message(STATUS "LTO not supported: ${ipo_output}")
 endif()
 
 # Configure files
